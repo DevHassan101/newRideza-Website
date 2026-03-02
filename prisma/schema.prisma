@@ -12,11 +12,65 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────
+//  ENUMS
+// ─────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  USER
+  DRIVER
+}
+
+enum DriverStatus {
+  PENDING // just registered, waiting for admin approval
+  APPROVED // admin ne approve kar diya
+  REJECTED // admin ne reject kar diya
+  SUSPENDED // admin ne suspend kar diya (ban like)
+}
+
+// ─────────────────────────────────────────
+//  USER  (covers ADMIN + USER + DRIVER)
+//  Admin manually DB mein add hoga (role = ADMIN)
+//  User  register form say (role = USER)
+//  Driver register form say (role = DRIVER) + DriverProfile banta hai
+// ─────────────────────────────────────────
+
 model User {
   id            String         @id @default(cuid())
   name          String
   email         String         @unique
+  phone         String         @unique
   password      String
+  role          Role           @default(USER)
+  isActive      Boolean        @default(true) // admin block/unblock kar sakta hai
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  // Relations
+  driverProfile DriverProfile? // only exists if role == DRIVER
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+//  DRIVER PROFILE
+//  Har driver ka ek profile hoga jo User say linked hai
+//  Admin yahan status change karega
+// ─────────────────────────────────────────
+
+model DriverProfile {
+  id         String       @id @default(cuid())
+  userId     String       @unique
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aadhaar    String       @unique
+  city       String
+  profilePic String?
+  status     DriverStatus @default(PENDING)
+  reviewedBy String?
+  reviewedAt DateTime?
+  reviewNote String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@map("driver_profiles")
 }
