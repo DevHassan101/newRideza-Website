@@ -10,9 +10,9 @@
 //       <ul>
 //         {users.map((user) => (
 //           <li key={user.id}>
-//             {user.username}
-//             <p>{user.useremail}</p>
-//             <p>{user.userpassword}</p>
+//             {user.name}
+//             <p>{user.email}</p>
+//             <p>{user.password}</p>
 //             <strong>{user.createdAt.toLocaleDateString()}</strong>
 //           </li>
 //         ))}
