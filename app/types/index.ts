@@ -11,6 +11,15 @@ export enum DriverStatus {
     SUSPENDED = "SUSPENDED",
 }
 
+export enum BanReason {
+    FAKE_BOOKING = "FAKE_BOOKING",
+    REPEATED_CANCELS = "REPEATED_CANCELS",
+    HARASSMENT = "HARASSMENT",
+    FRAUD = "FRAUD",
+    FAKE_ACCOUNT = "FAKE_ACCOUNT",
+    OTHER = "OTHER",
+}
+
 export interface DriverProfile {
     id: string;
     userId: string;
@@ -34,5 +43,9 @@ export interface User {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
+    bannedAt: Date | null;
+    bannedBy: string | null;
+    banReason: BanReason | null;
+    banNote: string | null;
     driverProfile?: DriverProfile | null;
 }

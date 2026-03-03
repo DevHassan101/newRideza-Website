@@ -83,12 +83,16 @@ export default function AdminDashboardPage() {
     // Driver states
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [summary, setSummary] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);        // sirf pehli baar — stat cards ke liye
+    const [tableLoading, setTableLoading] = useState(true); // sirf table ke liye
     const [filterStatus, setFilterStatus] = useState<string>("");
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [modal, setModal] = useState<{ open: boolean; driver: Driver | null }>({ open: false, driver: null });
     const [newStatus, setNewStatus] = useState<DriverStatus>("APPROVED");
     const [reviewNote, setReviewNote] = useState("");
+    const [driverSearch, setDriverSearch] = useState("");
+    const [deleteDriverModal, setDeleteDriverModal] = useState<{ open: boolean; driver: Driver | null }>({ open: false, driver: null });
+    const [deleteDriverLoading, setDeleteDriverLoading] = useState(false);
 
     // State mein add karo (top mein):
     const [currentPage, setCurrentPage] = useState(1);
@@ -101,14 +105,25 @@ export default function AdminDashboardPage() {
     }, [filterStatus]);
 
     // Table ke upar paginated data:
-    const totalPages = Math.ceil(drivers.length / driversPerPage);
-    const paginatedDrivers = drivers.slice(
+    const filteredDrivers = drivers.filter((d) => {
+        if (!driverSearch.trim()) return true;
+        const q = driverSearch.toLowerCase();
+        return (
+            d.user.name.toLowerCase().includes(q) ||
+            d.user.email.toLowerCase().includes(q) ||
+            d.city.toLowerCase().includes(q)
+        );
+    });
+
+    const totalPages = Math.ceil(filteredDrivers.length / driversPerPage);
+    const paginatedDrivers = filteredDrivers.slice(
         (currentPage - 1) * driversPerPage,
         currentPage * driversPerPage
     );
 
-    const fetchDrivers = async (status?: string) => {
-        setLoading(true);
+    const fetchDrivers = async (status?: string, showFullLoader = false) => {
+        if (showFullLoader) setLoading(true);
+        setTableLoading(true);  // ← sirf table spinner
         try {
             const url = status ? `/api/admin/drivers?status=${status}` : "/api/admin/drivers";
             const res = await fetch(url);
@@ -122,11 +137,13 @@ export default function AdminDashboardPage() {
             console.error("Failed to fetch drivers");
         } finally {
             setLoading(false);
+            setTableLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchDrivers(filterStatus || undefined);
+        fetchDrivers(filterStatus || undefined, true); // ← true pass karo
+        setCurrentPage(1);
     }, [filterStatus]);
 
     const openModal = (driver: Driver) => {
@@ -161,6 +178,18 @@ export default function AdminDashboardPage() {
             console.error("Status update failed");
         } finally {
             setActionLoading(null);
+        }
+    };
+
+    const handleDeleteDriver = async () => {
+        if (!deleteDriverModal.driver) return;
+        setDeleteDriverLoading(true);
+        try {
+            await fetch(`/api/admin/user/${deleteDriverModal.driver.user.id}`, { method: "DELETE" });
+            setDeleteDriverModal({ open: false, driver: null });
+            fetchDrivers(filterStatus || undefined);
+        } finally {
+            setDeleteDriverLoading(false);
         }
     };
 
@@ -202,15 +231,15 @@ export default function AdminDashboardPage() {
             color: "rose",
             icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
         },
-        {
-            label: "Suspended",
-            value: summary.suspended.toString(),
-            change: summary.suspended > 0 ? "Under review" : "None",
-            up: summary.suspended === 0,
-            sub: "access restricted",
-            color: "violet",
-            icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>,
-        },
+        // {
+        //     label: "Suspended",
+        //     value: summary.suspended.toString(),
+        //     change: summary.suspended > 0 ? "Under review" : "None",
+        //     up: summary.suspended === 0,
+        //     sub: "access restricted",
+        //     color: "violet",
+        //     icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>,
+        // },
     ];
 
     // Dynamic donut chart from real summary
@@ -238,7 +267,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Stat Cards — DYNAMIC */}
-            <div className="grid grid-cols-2 xl:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                 {statCards.map((card) => {
                     const c = colorMap[card.color];
                     return (
@@ -273,17 +302,34 @@ export default function AdminDashboardPage() {
                             <h3 className="text-[14px] font-bold text-zinc-800">Drivers Management</h3>
                             <p className="text-[11.5px] text-zinc-400 mt-0.5">Manage approvals and status</p>
                         </div>
-                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-                            className="text-[12px] border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-600 focus:outline-none focus:border-cyan-400 bg-zinc-50">
-                            <option value="">All Status</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="APPROVED">Approved</option>
-                            <option value="REJECTED">Rejected</option>
-                            <option value="SUSPENDED">Suspended</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                            {/* Search */}
+                            <div className="relative">
+                                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input
+                                    type="text"
+                                    placeholder="Search driver..."
+                                    value={driverSearch}
+                                    onChange={(e) => { setDriverSearch(e.target.value); setCurrentPage(1); }}
+                                    className="border border-zinc-200 bg-zinc-50 rounded-xl pl-8 pr-3 py-1.5 text-[12px] text-zinc-700 placeholder-zinc-400 focus:outline-none focus:border-cyan-400 w-44"
+                                />
+                            </div>
+                            {/* Status Filter */}
+                            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+                                className="text-[12px] border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-600 focus:outline-none focus:border-cyan-400 bg-zinc-50">
+                                <option value="">All Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="APPROVED">Approved</option>
+                                <option value="REJECTED">Rejected</option>
+                                <option value="SUSPENDED">Suspended</option>
+                            </select>
+                        </div>
                     </div>
-
-                    {loading ? (
+                    {tableLoading ? (
                         <div className="flex items-center justify-center py-14">
                             <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
                         </div>
@@ -326,10 +372,22 @@ export default function AdminDashboardPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <button onClick={() => openModal(driver)}
-                                                        className="text-[11.5px] font-semibold text-cyan-500 hover:text-cyan-600 border border-cyan-200 hover:border-cyan-400 bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-all">
-                                                        Manage
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => openModal(driver)}
+                                                            className="text-[11.5px] font-semibold text-cyan-500 hover:text-cyan-600 border border-cyan-200 hover:border-cyan-400 bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition-all">
+                                                            Manage
+                                                        </button>
+                                                        {/* Delete button */}
+                                                        <button
+                                                            onClick={() => setDeleteDriverModal({ open: true, driver })}
+                                                            className="text-zinc-400 hover:text-red-500 border border-zinc-200 hover:border-red-200 bg-zinc-50 hover:bg-red-50 p-1.5 rounded-lg transition-all"
+                                                            title="Delete driver"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -339,15 +397,15 @@ export default function AdminDashboardPage() {
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-100">
+                                <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-100 cursor-pointer">
                                     <p className="text-[11.5px] text-zinc-400">
                                         Showing {((currentPage - 1) * driversPerPage) + 1}–{Math.min(currentPage * driversPerPage, drivers.length)} of {drivers.length} drivers
                                     </p>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 cursor-pointer">
                                         <button
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage === 1}
-                                            className="w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:border-cyan-400 hover:text-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                            className="w-7 h-7 cursor-pointer rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:border-cyan-400 hover:text-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -358,9 +416,9 @@ export default function AdminDashboardPage() {
                                             <button
                                                 key={page}
                                                 onClick={() => setCurrentPage(page)}
-                                                className={`w-7 h-7 rounded-lg text-[12px] font-semibold transition-all ${currentPage === page
-                                                        ? "bg-cyan-500 text-white border border-cyan-500"
-                                                        : "border border-zinc-200 text-zinc-500 hover:border-cyan-400 hover:text-cyan-500"
+                                                className={`w-7 h-7 cursor-pointer rounded-lg text-[12px] font-semibold transition-all ${currentPage === page
+                                                    ? "bg-cyan-500 text-white border border-cyan-500"
+                                                    : "border border-zinc-200 text-zinc-500 hover:border-cyan-400 hover:text-cyan-500"
                                                     }`}
                                             >
                                                 {page}
@@ -370,7 +428,7 @@ export default function AdminDashboardPage() {
                                         <button
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage === totalPages}
-                                            className="w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:border-cyan-400 hover:text-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                            className="w-7 h-7 cursor-pointer rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:border-cyan-400 hover:text-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -552,6 +610,39 @@ export default function AdminDashboardPage() {
                             <button onClick={handleStatusChange} disabled={actionLoading === modal.driver.id}
                                 className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-cyan-400 to-cyan-500 text-white text-[13.5px] font-semibold hover:from-cyan-500 hover:to-cyan-400 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                                 {actionLoading === modal.driver.id ? "Updating..." : "Update Status"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {deleteDriverModal.open && deleteDriverModal.driver && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 border border-zinc-100">
+                        <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                        <div className="text-center mb-6">
+                            <h4 className="text-[15px] font-bold text-zinc-800 mb-1">Delete Driver?</h4>
+                            <p className="text-[12.5px] text-zinc-500">
+                                <span className="font-semibold text-zinc-700">{deleteDriverModal.driver.user.name}</span> ko permanently delete karna chahte ho? Yeh action undo nahi ho sakta.
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteDriverModal({ open: false, driver: null })}
+                                className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-[13px] font-semibold text-zinc-600 hover:bg-zinc-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteDriver}
+                                disabled={deleteDriverLoading}
+                                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[13px] font-semibold transition-all disabled:opacity-60"
+                            >
+                                {deleteDriverLoading ? "Deleting..." : "Delete"}
                             </button>
                         </div>
                     </div>
