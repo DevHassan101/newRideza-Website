@@ -29,6 +29,16 @@ enum DriverStatus {
   SUSPENDED // admin ne suspend kar diya (ban like)
 }
 
+// Ban reasons enum
+enum BanReason {
+  FAKE_BOOKING        // Fake bookings
+  REPEATED_CANCELS    // Baar baar cancel karna
+  HARASSMENT          // Driver ko harass karna
+  FRAUD               // Payment fraud
+  FAKE_ACCOUNT        // Multiple fake accounts
+  OTHER               // Koi aur reason
+}
+
 // ─────────────────────────────────────────
 //  USER  (covers ADMIN + USER + DRIVER)
 //  Admin manually DB mein add hoga (role = ADMIN)
@@ -36,18 +46,42 @@ enum DriverStatus {
 //  Driver register form say (role = DRIVER) + DriverProfile banta hai
 // ─────────────────────────────────────────
 
+// model User {
+//   id            String         @id @default(cuid())
+//   name          String
+//   email         String         @unique
+//   phone         String         @unique
+//   password      String
+//   role          Role           @default(USER)
+//   isActive      Boolean        @default(true) // admin block/unblock kar sakta hai
+//   createdAt     DateTime       @default(now())
+//   updatedAt     DateTime       @updatedAt
+//   // Relations
+//   driverProfile DriverProfile? // only exists if role == DRIVER
+
+//   @@map("users")
+// }
+
 model User {
-  id            String         @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
-  email         String         @unique
-  phone         String         @unique
+  email         String    @unique
+  phone         String    @unique
   password      String
-  role          Role           @default(USER)
-  isActive      Boolean        @default(true) // admin block/unblock kar sakta hai
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  // Relations
-  driverProfile DriverProfile? // only exists if role == DRIVER
+  role          Role      @default(USER)
+  isActive      Boolean   @default(true)
+
+  // ── Ban Management (USER role ke liye) ──
+  bannedAt      DateTime?   // kab ban hua
+  bannedBy      String?     // admin ka user id
+  banReason     BanReason?  // dropdown reason
+  banNote       String?     // extra detail (optional)
+  // ─────────────────────────────────────────
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  driverProfile DriverProfile?
 
   @@map("users")
 }
