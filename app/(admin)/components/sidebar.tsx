@@ -56,17 +56,12 @@ const navItems = [
     },
 ];
 
-interface SidebarProps {
-    open: boolean;
-    onClose: () => void;
-}
+interface SidebarProps { open: boolean; onClose: () => void; }
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
     const pathname = usePathname();
-
     return (
         <aside className={`fixed left-0 top-0 h-full w-72 bg-white border-r border-zinc-200 shadow-sm flex flex-col z-40 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`}>
-            {/* Logo */}
             <div className="px-6 py-5 border-b border-zinc-200">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-[10px] bg-linear-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-200">
@@ -80,7 +75,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     </div>
                 </div>
             </div>
-            {/* Nav */}
             <nav className="flex-1 px-5 py-5 space-y-3 overflow-y-auto custom-scrollbar">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;

@@ -326,7 +326,7 @@ export default function AdminDashboardPage() {
                         </div>
                     ) : (
                         <div>
-                            <div className="overflow-x-auto">
+                            <div className="table-overflow-scroll overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-zinc-50/80">

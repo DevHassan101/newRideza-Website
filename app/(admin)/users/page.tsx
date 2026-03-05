@@ -191,7 +191,7 @@ export default function UsersPage() {
                         <p className="text-[14px] text-zinc-400">No users found.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="table-overflow-scroll overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-zinc-50/80">
