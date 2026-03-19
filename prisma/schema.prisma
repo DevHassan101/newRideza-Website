@@ -31,12 +31,12 @@ enum DriverStatus {
 
 // Ban reasons enum
 enum BanReason {
-  FAKE_BOOKING        // Fake bookings
-  REPEATED_CANCELS    // Baar baar cancel karna
-  HARASSMENT          // Driver ko harass karna
-  FRAUD               // Payment fraud
-  FAKE_ACCOUNT        // Multiple fake accounts
-  OTHER               // Koi aur reason
+  FAKE_BOOKING // Fake bookings
+  REPEATED_CANCELS // Baar baar cancel karna
+  HARASSMENT // Driver ko harass karna
+  FRAUD // Payment fraud
+  FAKE_ACCOUNT // Multiple fake accounts
+  OTHER // Koi aur reason
 }
 
 // ─────────────────────────────────────────
@@ -46,41 +46,20 @@ enum BanReason {
 //  Driver register form say (role = DRIVER) + DriverProfile banta hai
 // ─────────────────────────────────────────
 
-// model User {
-//   id            String         @id @default(cuid())
-//   name          String
-//   email         String         @unique
-//   phone         String         @unique
-//   password      String
-//   role          Role           @default(USER)
-//   isActive      Boolean        @default(true) // admin block/unblock kar sakta hai
-//   createdAt     DateTime       @default(now())
-//   updatedAt     DateTime       @updatedAt
-//   // Relations
-//   driverProfile DriverProfile? // only exists if role == DRIVER
-
-//   @@map("users")
-// }
-
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
-  email         String    @unique
-  phone         String    @unique
+  email         String         @unique
+  phone         String         @unique
   password      String
-  role          Role      @default(USER)
-  isActive      Boolean   @default(true)
-
-  // ── Ban Management (USER role ke liye) ──
-  bannedAt      DateTime?   // kab ban hua
-  bannedBy      String?     // admin ka user id
-  banReason     BanReason?  // dropdown reason
-  banNote       String?     // extra detail (optional)
-  // ─────────────────────────────────────────
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
+  role          Role           @default(USER)
+  isActive      Boolean        @default(true)
+  bannedAt      DateTime?
+  bannedBy      String?
+  banReason     BanReason?
+  banNote       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   driverProfile DriverProfile?
 
   @@map("users")
@@ -93,18 +72,24 @@ model User {
 // ─────────────────────────────────────────
 
 model DriverProfile {
-  id         String       @id @default(cuid())
-  userId     String       @unique
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  aadhaar    String       @unique
-  city       String
-  profilePic String?
-  status     DriverStatus @default(PENDING)
-  reviewedBy String?
-  reviewedAt DateTime?
-  reviewNote String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aadhaar         String       @unique
+  city            String
+  dateOfBirth     DateTime?
+  profilePic      String?
+  aadhaarFrontPic String?
+  aadhaarBackPic  String?
+  licensePic      String?
+  licenseNumber   String?      @unique
+  licenseExpiry   DateTime?
+  status          DriverStatus @default(PENDING)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewNote      String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   @@map("driver_profiles")
 }

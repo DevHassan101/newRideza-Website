@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
         }
 
         const searchParams = request.nextUrl.searchParams;
-        const status = searchParams.get("status");   // ?status=PENDING
-        const city = searchParams.get("city");       // ?city=Karachi
-        const isActive = searchParams.get("isActive"); // ?isActive=false
+        const status = searchParams.get("status");
+        const city = searchParams.get("city");
+        const isActive = searchParams.get("isActive");
 
         const where: Prisma.DriverProfileWhereInput = {};
 
@@ -59,7 +59,13 @@ export async function GET(request: NextRequest) {
                 id: true,
                 city: true,
                 aadhaar: true,
+                dateOfBirth: true,       // ✅ NEW
                 profilePic: true,
+                aadhaarFrontPic: true,   // ✅ NEW
+                aadhaarBackPic: true,    // ✅ NEW
+                licensePic: true,        // ✅ NEW
+                licenseNumber: true,     // ✅ NEW
+                licenseExpiry: true,     // ✅ NEW
                 status: true,
                 reviewedBy: true,
                 reviewedAt: true,
