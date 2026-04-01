@@ -8,30 +8,65 @@ export async function GET(request: NextRequest) {
     try {
         const admin = await getCurrentUser();
 
-        // Auth check
         if (!admin) {
-            return NextResponse.json(
-                { error: "Not authenticated" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
-        // Admin only
         if (admin.role !== Role.ADMIN) {
-            return NextResponse.json(
-                { error: "Access denied. Admins only." },
-                { status: 403 }
-            );
+            return NextResponse.json({ error: "Access denied. Admins only." }, { status: 403 });
         }
 
         const searchParams = request.nextUrl.searchParams;
-        const status = searchParams.get("status");
-        const city = searchParams.get("city");
+        const status   = searchParams.get("status");
+        const city     = searchParams.get("city");
         const isActive = searchParams.get("isActive");
+        // ✅ Fix 1: Single driver by ID prefix — sirf ek driver DB se aata hai
+        const driverId = searchParams.get("driverId");
 
+        // ── Single driver fetch ──────────────────────────────────────────────
+        if (driverId) {
+            const driver = await prisma.driverProfile.findFirst({
+                where: { id: { startsWith: driverId } },
+                select: {
+                    id: true,
+                    city: true,
+                    aadhaar: true,
+                    dateOfBirth: true,
+                    profilePic: true,
+                    aadhaarFrontPic: true,
+                    aadhaarBackPic: true,
+                    licensePic: true,
+                    licenseNumber: true,
+                    licenseExpiry: true,
+                    status: true,
+                    reviewedBy: true,
+                    reviewedAt: true,
+                    reviewNote: true,
+                    createdAt: true,
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            phone: true,
+                            isActive: true,
+                            createdAt: true,
+                            role: true,
+                        },
+                    },
+                },
+            });
+
+            if (!driver) {
+                return NextResponse.json({ error: "Driver not found" }, { status: 404 });
+            }
+
+            return NextResponse.json({ driver });
+        }
+
+        // ── List fetch ───────────────────────────────────────────────────────
         const where: Prisma.DriverProfileWhereInput = {};
 
-        // Filter by driver status
         if (status) {
             const validStatuses = Object.values(DriverStatus);
             if (!validStatuses.includes(status as DriverStatus)) {
@@ -43,13 +78,11 @@ export async function GET(request: NextRequest) {
             where.status = status as DriverStatus;
         }
 
-        // Filter by city
         if (city) {
             where.city = { contains: city, mode: "insensitive" };
         }
 
-        // Filter by user isActive
-        if (isActive !== null) {
+        if (isActive !== null && isActive !== "") {
             where.user = { isActive: isActive === "true" };
         }
 
@@ -59,13 +92,13 @@ export async function GET(request: NextRequest) {
                 id: true,
                 city: true,
                 aadhaar: true,
-                dateOfBirth: true,       // ✅ NEW
+                dateOfBirth: true,
                 profilePic: true,
-                aadhaarFrontPic: true,   // ✅ NEW
-                aadhaarBackPic: true,    // ✅ NEW
-                licensePic: true,        // ✅ NEW
-                licenseNumber: true,     // ✅ NEW
-                licenseExpiry: true,     // ✅ NEW
+                aadhaarFrontPic: true,
+                aadhaarBackPic: true,
+                licensePic: true,
+                licenseNumber: true,
+                licenseExpiry: true,
                 status: true,
                 reviewedBy: true,
                 reviewedAt: true,
@@ -78,18 +111,19 @@ export async function GET(request: NextRequest) {
                         email: true,
                         phone: true,
                         isActive: true,
+                        createdAt: true,
+                        role: true,
                     },
                 },
             },
             orderBy: { createdAt: "desc" },
         });
 
-        // Count by status for summary
         const summary = {
-            total: drivers.length,
-            pending: drivers.filter(d => d.status === DriverStatus.PENDING).length,
-            approved: drivers.filter(d => d.status === DriverStatus.APPROVED).length,
-            rejected: drivers.filter(d => d.status === DriverStatus.REJECTED).length,
+            total:     drivers.length,
+            pending:   drivers.filter(d => d.status === DriverStatus.PENDING).length,
+            approved:  drivers.filter(d => d.status === DriverStatus.APPROVED).length,
+            rejected:  drivers.filter(d => d.status === DriverStatus.REJECTED).length,
             suspended: drivers.filter(d => d.status === DriverStatus.SUSPENDED).length,
         };
 
@@ -97,9 +131,6 @@ export async function GET(request: NextRequest) {
 
     } catch (error) {
         console.error("Get drivers error:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

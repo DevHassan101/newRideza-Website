@@ -80,7 +80,7 @@ export default function OnboardingPage() {
             {/* Sticky Header */}
             <div className="sticky top-0 z-10 bg-white border-b border-zinc-200">
                 <div className="flex items-center gap-3 px-4 py-4">
-                    <button onClick={() => router.push("/driver/profile")}
+                    <button onClick={() => router.push("/driver/home")}
                         className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors shrink-0">
                         <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7"/>

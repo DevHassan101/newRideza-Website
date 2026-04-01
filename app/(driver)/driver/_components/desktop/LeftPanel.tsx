@@ -3,39 +3,44 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const NAV = [
+const ALL_NAV = [
   {
-    id: "home", label: "Dashboard", icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M10.995 4.68v3.88A2.44 2.44 0 0 1 8.545 11h-3.86a2.38 2.38 0 0 1-1.72-.72a2.4 2.4 0 0 1-.71-1.72V4.69a2.44 2.44 0 0 1 2.43-2.44h3.87a2.42 2.42 0 0 1 1.72.72a2.4 2.4 0 0 1 .72 1.71m10.75.01v3.87a2.46 2.46 0 0 1-2.43 2.44h-3.88a2.5 2.5 0 0 1-1.73-.71a2.44 2.44 0 0 1-.71-1.73V4.69a2.4 2.4 0 0 1 .72-1.72a2.42 2.42 0 0 1 1.72-.72h3.87a2.46 2.46 0 0 1 2.44 2.44m0 10.75v3.87a2.46 2.46 0 0 1-2.43 2.44h-3.88a2.5 2.5 0 0 1-1.75-.69a2.42 2.42 0 0 1-.71-1.73v-3.87a2.4 2.4 0 0 1 .72-1.72a2.42 2.42 0 0 1 1.72-.72h3.87a2.46 2.46 0 0 1 2.44 2.44zm-10.75.01v3.87a2.46 2.46 0 0 1-2.45 2.43h-3.86a2.42 2.42 0 0 1-2.43-2.43v-3.87A2.46 2.46 0 0 1 4.685 13h3.87a2.5 2.5 0 0 1 1.73.72a2.45 2.45 0 0 1 .71 1.73" strokeWidth="0.1" stroke="currentColor" /></svg>
-    )
+    id: "home", label: "Dashboard",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M10.995 4.68v3.88A2.44 2.44 0 0 1 8.545 11h-3.86a2.38 2.38 0 0 1-1.72-.72a2.4 2.4 0 0 1-.71-1.72V4.69a2.44 2.44 0 0 1 2.43-2.44h3.87a2.42 2.42 0 0 1 1.72.72a2.4 2.4 0 0 1 .72 1.71m10.75.01v3.87a2.46 2.46 0 0 1-2.43 2.44h-3.88a2.5 2.5 0 0 1-1.73-.71a2.44 2.44 0 0 1-.71-1.73V4.69a2.4 2.4 0 0 1 .72-1.72a2.42 2.42 0 0 1 1.72-.72h3.87a2.46 2.46 0 0 1 2.44 2.44m0 10.75v3.87a2.46 2.46 0 0 1-2.43 2.44h-3.88a2.5 2.5 0 0 1-1.75-.69a2.42 2.42 0 0 1-.71-1.73v-3.87a2.4 2.4 0 0 1 .72-1.72a2.42 2.42 0 0 1 1.72-.72h3.87a2.46 2.46 0 0 1 2.44 2.44zm-10.75.01v3.87a2.46 2.46 0 0 1-2.45 2.43h-3.86a2.42 2.42 0 0 1-2.43-2.43v-3.87A2.46 2.46 0 0 1 4.685 13h3.87a2.5 2.5 0 0 1 1.73.72a2.45 2.45 0 0 1 .71 1.73" strokeWidth="0.1" stroke="currentColor" /></svg>,
   },
   {
-    id: "live-map", label: "Live Rides", icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" fillRule="evenodd" d="M4.218 4.092C4 4.52 4 5.08 4 6.2v.614l17.99-1.636c-.019-.488-.07-.814-.208-1.086a2 2 0 0 0-.874-.874C20.48 3 19.92 3 18.8 3H7.2c-1.12 0-1.68 0-2.108.218a2 2 0 0 0-.874.874M22 7.186l-4.865.442l2.506 13.367c.592-.013.963-.058 1.267-.213a2 2 0 0 0 .874-.874C22 19.48 22 18.92 22 17.8zM17.608 21L15.134 7.81L4 8.822V17.8c0 1.12 0 1.68.218 2.108a2 2 0 0 0 .874.874C5.52 21 6.08 21 7.2 21zM13.5 15.03c0 2.158-2.14 3.674-3.073 4.233a.83.83 0 0 1-.854 0C8.64 18.704 6.5 17.188 6.5 15.029c0-2.117 1.696-3.529 3.5-3.529c1.867 0 3.5 1.412 3.5 3.53" clipRule="evenodd" /><circle cx="10" cy="15" r="1" fill="currentColor" /></svg>
-    )
+    id: "live-map", label: "Live Rides",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" fillRule="evenodd" d="M4.218 4.092C4 4.52 4 5.08 4 6.2v.614l17.99-1.636c-.019-.488-.07-.814-.208-1.086a2 2 0 0 0-.874-.874C20.48 3 19.92 3 18.8 3H7.2c-1.12 0-1.68 0-2.108.218a2 2 0 0 0-.874.874M22 7.186l-4.865.442l2.506 13.367c.592-.013.963-.058 1.267-.213a2 2 0 0 0 .874-.874C22 19.48 22 18.92 22 17.8zM17.608 21L15.134 7.81L4 8.822V17.8c0 1.12 0 1.68.218 2.108a2 2 0 0 0 .874.874C5.52 21 6.08 21 7.2 21zM13.5 15.03c0 2.158-2.14 3.674-3.073 4.233a.83.83 0 0 1-.854 0C8.64 18.704 6.5 17.188 6.5 15.029c0-2.117 1.696-3.529 3.5-3.529c1.867 0 3.5 1.412 3.5 3.53" clipRule="evenodd" /><circle cx="10" cy="15" r="1" fill="currentColor" /></svg>,
   },
   {
-    id: "my-bookings", label: "My Bookings", icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-4.5 h-4.5" viewBox="0 0 512 512"><path fill="currentColor" d="M480 128a64 64 0 0 0-64-64h-16V48.45c0-8.61-6.62-16-15.23-16.43A16 16 0 0 0 368 48v16H144V48.45c0-8.61-6.62-16-15.23-16.43A16 16 0 0 0 112 48v16H96a64 64 0 0 0-64 64v12a4 4 0 0 0 4 4h440a4 4 0 0 0 4-4ZM32 416a64 64 0 0 0 64 64h320a64 64 0 0 0 64-64V179a3 3 0 0 0-3-3H35a3 3 0 0 0-3 3Zm344-208a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24" /></svg>
-    )
+    id: "my-bookings", label: "My Bookings",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-4.5 h-4.5" viewBox="0 0 512 512"><path fill="currentColor" d="M480 128a64 64 0 0 0-64-64h-16V48.45c0-8.61-6.62-16-15.23-16.43A16 16 0 0 0 368 48v16H144V48.45c0-8.61-6.62-16-15.23-16.43A16 16 0 0 0 112 48v16H96a64 64 0 0 0-64 64v12a4 4 0 0 0 4 4h440a4 4 0 0 0 4-4ZM32 416a64 64 0 0 0 64 64h320a64 64 0 0 0 64-64V179a3 3 0 0 0-3-3H35a3 3 0 0 0-3 3Zm344-208a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m-80-80a24 24 0 1 1-24 24a24 24 0 0 1 24-24m0 80a24 24 0 1 1-24 24a24 24 0 0 1 24-24" /></svg>,
   },
   {
-    id: "profile", label: "Profile", icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5m-4 9.5A3.75 3.75 0 0 0 4.25 17v1.188c0 .754.546 1.396 1.29 1.517c4.278.699 8.642.699 12.92 0a1.54 1.54 0 0 0 1.29-1.517V17A3.75 3.75 0 0 0 16 13.25h-.34q-.28.001-.544.086l-.866.283a7.25 7.25 0 0 1-4.5 0l-.866-.283a1.8 1.8 0 0 0-.543-.086z" /></svg>
-    )
+    id: "profile", label: "Profile",
+    icon: <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5m-4 9.5A3.75 3.75 0 0 0 4.25 17v1.188c0 .754.546 1.396 1.29 1.517c4.278.699 8.642.699 12.92 0a1.54 1.54 0 0 0 1.29-1.517V17A3.75 3.75 0 0 0 16 13.25h-.34q-.28.001-.544.086l-.866.283a7.25 7.25 0 0 1-4.5 0l-.866-.283a1.8 1.8 0 0 0-.543-.086z" /></svg>,
   },
 ];
 
+// ── Status se allowed nav IDs ─────────────────────────────────────────────────
+function getAllowedNavIds(status: string): string[] {
+  if (status === "APPROVED")  return ["home", "live-map", "my-bookings", "profile"];
+  if (status === "PENDING")   return ["home", "profile"]; // profile complete karo
+  if (status === "REJECTED")  return ["home", "profile"]; // support se contact karo
+  if (status === "SUSPENDED") return ["home"];             // sirf dashboard
+  return ["home"];
+}
+
 export default function LeftPanel({ isOnline, onToggleOnline, activeNav, onNav }: any) {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [user,       setUser]       = useState<any>(null);
+  const [loading,    setLoading]    = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then(r => r.json())
-      .then(data => { setUser(data.user); setLoading(false); })  // ← setLoading
+      .then(data => { setUser(data.user); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
@@ -45,9 +50,14 @@ export default function LeftPanel({ isOnline, onToggleOnline, activeNav, onNav }
     router.push("/login");
   };
 
-  const name = user?.name ?? "";
-  const city = user?.driverProfile?.city ?? "";
+  const name       = user?.name ?? "";
+  const city       = user?.driverProfile?.city ?? "";
   const profilePic = user?.driverProfile?.profilePic ?? "";
+  const status     = user?.driverProfile?.status ?? "PENDING";
+
+  // ── Nav filter per status ──
+  const allowedIds = getAllowedNavIds(status);
+  const NAV = ALL_NAV.filter(item => allowedIds.includes(item.id));
 
   return (
     <aside className="w-75! bg-white flex flex-col h-full shrink-0 border-r border-zinc-200">
@@ -69,8 +79,6 @@ export default function LeftPanel({ isOnline, onToggleOnline, activeNav, onNav }
       <div className="mx-4 mt-4 p-3.5 rounded-2xl bg-gray-50/90 border border-cyan-500/50">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-
-            {/* ── Avatar / Skeleton ── */}
             {loading ? (
               <div className="w-11 h-11 rounded-full bg-zinc-200 animate-pulse" />
             ) : (
@@ -78,28 +86,22 @@ export default function LeftPanel({ isOnline, onToggleOnline, activeNav, onNav }
                 {profilePic
                   ? <img src={profilePic} alt="" className="w-full h-full object-cover" />
                   : <div className="w-full h-full bg-cyan-500 flex items-center justify-center font-black text-lg text-white">
-                    {name?.charAt(0)?.toUpperCase() || "A"}
-                  </div>
+                      {name?.charAt(0)?.toUpperCase() || "A"}
+                    </div>
                 }
               </div>
             )}
-
-            {/* Online dot — sirf loaded hone pe dikhao */}
             {!loading && (
-              <span className={`absolute bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${isOnline ? "bg-green-400" : "bg-gray-400"
-                }`} />
+              <span className={`absolute bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${isOnline ? "bg-green-400" : "bg-gray-400"}`} />
             )}
           </div>
 
           <div className="min-w-0 flex-1">
-            {/* ── Name Skeleton ── */}
             {loading ? (
               <div className="h-4 w-28 rounded-md bg-zinc-200 animate-pulse mb-1.5" />
             ) : (
               <p className="text-black font-semibold text-sm truncate">{name}</p>
             )}
-
-            {/* ── City Skeleton ── */}
             {loading ? (
               <div className="h-3 w-16 rounded-md bg-zinc-200 animate-pulse" />
             ) : (
@@ -108,66 +110,56 @@ export default function LeftPanel({ isOnline, onToggleOnline, activeNav, onNav }
           </div>
         </div>
 
-        {/* Online toggle — loading mein bhi dikhta rahe, bas disabled */}
-        <button
-          onClick={onToggleOnline}
-          disabled={loading}
-          className={`mt-3 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border transition-all duration-300 ${loading
-            ? "bg-white/40 border-zinc-200 opacity-60"
-            : isOnline
-              ? "bg-cyan-500/10 border-cyan-500/30"
-              : "bg-white/40 border-zinc-200"
-            }`}
-        >
-          <div className="flex items-center gap-2">
-            {loading ? (
-              <div className="h-3 w-24 rounded-md bg-zinc-200 animate-pulse" />
-            ) : (
-              <>
-                <span className={`w-2 h-2 rounded-full transition-colors ${isOnline ? "bg-cyan-400 shadow-[0_0_6px_#22d3ee]" : "bg-gray-400"
-                  }`} />
-                <span className={`text-xs font-semibold ${isOnline ? "text-cyan-500" : "text-gray-500"}`}>
-                  {isOnline ? "You're Online" : "You're Offline"}
-                </span>
-              </>
-            )}
+        {/* Online toggle — sirf APPROVED ko */}
+        {!loading && status === "APPROVED" && (
+          <button onClick={onToggleOnline}
+            className={`mt-3 w-full flex items-center justify-between px-3 py-2.5 rounded-[10px] border transition-all duration-300 ${
+              isOnline ? "bg-cyan-500/10 border-cyan-500/30" : "bg-white/40 border-zinc-200"}`}>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full transition-colors ${isOnline ? "bg-cyan-400 shadow-[0_0_6px_#22d3ee]" : "bg-gray-400"}`} />
+              <span className={`text-xs font-semibold ${isOnline ? "text-cyan-500" : "text-gray-500"}`}>
+                {isOnline ? "You're Online" : "You're Offline"}
+              </span>
+            </div>
+            <div className={`w-9 h-5 rounded-full relative transition-colors duration-300 ${isOnline ? "bg-cyan-500" : "bg-gray-300"}`}>
+              <div className={`absolute top-[2.25px] w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${isOnline ? "left-4.5" : "left-0.5"}`} />
+            </div>
+          </button>
+        )}
+
+        {/* Non-approved status badge */}
+        {!loading && status !== "APPROVED" && (
+          <div className={`mt-3 px-3 py-2 rounded-[10px] border text-xs font-semibold text-center ${
+            status === "PENDING"   ? "bg-amber-50 border-amber-200 text-amber-600" :
+            status === "REJECTED"  ? "bg-red-50 border-red-200 text-red-500" :
+            "bg-zinc-100 border-zinc-200 text-zinc-500"
+          }`}>
+            {status === "PENDING"   ? "⏳ Pending Approval" :
+             status === "REJECTED"  ? "❌ Application Rejected" :
+             "🚫 Account Suspended"}
           </div>
-          <div className={`w-9 h-5 rounded-full relative transition-colors duration-300 ${loading ? "bg-gray-200" : isOnline ? "bg-cyan-500" : "bg-gray-300"
-            }`}>
-            <div className={`absolute top-[2.25px] w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${isOnline && !loading ? "left-4.5" : "left-0.5"
-              }`} />
-          </div>
-        </button>
+        )}
       </div>
 
-      {/* Navigation */}
+      {/* Navigation — filtered by status */}
       <nav className="mt-5 px-5 flex-1">
         {NAV.map((item) => (
           <button key={item.id} onClick={() => onNav(item.id)}
-            className={`w-full cursor-pointer flex items-center gap-3.5 px-2.5 py-2.5 rounded-xl mb-3 transition-all duration-200 text-left relative ${activeNav === item.id
-              ? "bg-linear-to-r bg-cyan-500 to-cyan-400 text-white shadow-md shadow-cyan-200"
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"
-              }`}>
+            className={`w-full cursor-pointer flex items-center gap-3.5 px-2.5 py-2.5 rounded-xl mb-3 transition-all duration-200 text-left relative ${
+              activeNav === item.id
+                ? "bg-linear-to-r bg-cyan-500 to-cyan-400 text-white shadow-md shadow-cyan-200"
+                : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"}`}>
             {activeNav === item.id && (
               <span className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/40 rounded-l-full" />
             )}
-            <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 transition-all duration-200 ${activeNav === item.id ? "bg-white/20 text-white" : "bg-linear-to-r from-cyan-500 to-cyan-400 text-white"
-              }`}>
+            <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 transition-all duration-200 ${
+              activeNav === item.id ? "bg-white/20 text-white" : "bg-linear-to-r from-cyan-500 to-cyan-400 text-white"}`}>
               {item.icon}
             </div>
             <span className="text-[15px] font-semibold">{item.label}</span>
           </button>
         ))}
       </nav>
-
-      {/* Notifications */}
-      {/* <div className="px-5 pt-4 border-t border-zinc-200">
-        <div className="flex items-center gap-2 px-3 py-3.5 rounded-xl bg-linear-to-br from-cyan-400 to-cyan-600">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4.5 h-4.5 text-white" viewBox="0 0 24 24"><path fill="currentColor" d="M14.235 19c.865 0 1.322 1.024.745 1.668A4 4 0 0 1 12 22a4 4 0 0 1-2.98-1.332c-.552-.616-.158-1.579.634-1.661l.11-.006zM12 2c1.358 0 2.506.903 2.875 2.141l.046.171l.008.043a8.01 8.01 0 0 1 4.024 6.069l.028.287L19 11v2.931l.021.136a3 3 0 0 0 1.143 1.847l.167.117l.162.099c.86.487.56 1.766-.377 1.864L20 18H4c-1.028 0-1.387-1.364-.493-1.87a3 3 0 0 0 1.472-2.063L5 13.924l.001-2.97A8 8 0 0 1 8.822 4.5l.248-.146l.01-.043a3 3 0 0 1 2.562-2.29l.182-.017z"/></svg>
-          <span className="text-white text-sm font-medium">Notifications</span>
-          <span className="ml-auto bg-cyan-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
-        </div>
-      </div> */}
 
       {/* Logout */}
       <div className="px-5 py-4">
